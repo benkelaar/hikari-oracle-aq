@@ -1569,7 +1569,7 @@ public class HikariWrappingDataSource extends HikariDataSource {
 
         @Override
         public String toString() {
-            return "Oracle wrapper around " + super.toString();
+            return "Oracle wrapper around " + connection.toString();
         }
     }
 }
