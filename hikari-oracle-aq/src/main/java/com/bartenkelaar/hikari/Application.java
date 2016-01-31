@@ -10,17 +10,12 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.env.Environment;
 import org.springframework.jms.core.JmsTemplate;
-import org.springframework.util.ErrorHandler;
-
-import java.util.concurrent.atomic.AtomicBoolean;
 
 @Configuration
 @ComponentScan
 @PropertySource("classpath:hikari.properties")
 public class Application {
     private static final Logger LOG = LoggerFactory.getLogger(Application.class);
-
-    private static AtomicBoolean errorOccured = new AtomicBoolean();
 
     public static void main(String[] args) {
         LOG.info("Loading application context");
@@ -32,8 +27,9 @@ public class Application {
                 environment.getProperty("test.messages.amount", Integer.class)
         );
 
-        LOG.info("Waiting until error occurs");
-        while (!errorOccured.get()) { /* wait */ }
+        LOG.info("Waiting until error occurs or last message has been handled");
+        Finisher finisher = context.getBean(Finisher.class);
+        while (!finisher.isFinished()) { /* wait */ }
 
         LOG.info("Closing application context");
         context.close();
@@ -48,15 +44,7 @@ public class Application {
     }
 
     @Bean
-    public PropertySourcesPlaceholderConfigurer configurer() {
+    public static PropertySourcesPlaceholderConfigurer configurer() {
         return new PropertySourcesPlaceholderConfigurer();
-    }
-
-    @Bean
-    public ErrorHandler programCloser() {
-        return t -> {
-            LOG.error("Exception caught in error handler", t);
-            errorOccured.set(true);
-        };
     }
 }
