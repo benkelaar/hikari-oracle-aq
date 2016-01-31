@@ -23,7 +23,7 @@ class Finisher implements ErrorHandler {
     private volatile boolean finished;
 
     @Inject
-    Finisher(@Value("test.messages.amount") int amountOfMessages) {
+    Finisher(@Value("${test.messages.amount}") int amountOfMessages) {
         this.amountOfMessages = amountOfMessages;
     }
 
