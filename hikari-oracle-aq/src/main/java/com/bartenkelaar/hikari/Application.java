@@ -8,6 +8,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
+import org.springframework.core.env.Environment;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.util.ErrorHandler;
 
@@ -25,13 +26,11 @@ public class Application {
         LOG.info("Loading application context");
         AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(Application.class);
 
-        LOG.info("Sending 4 messages");
-        JmsTemplate jmsTemplate = context.getBean(JmsTemplate.class);
-        String queueName = context.getEnvironment().getProperty("database.queue.owner") + ".TEST_QUEUE";
-        for (int i = 1; i <= 4; i++) {
-            LOG.debug("Sending message " + i);
-            jmsTemplate.convertAndSend(queueName, Integer.toString(i));
-        }
+        Environment environment = context.getEnvironment();
+        sendMessages(context.getBean(JmsTemplate.class),
+                environment.getProperty("database.queue.owner") + ".TEST_QUEUE",
+                environment.getProperty("test.messages.amount", Integer.class)
+        );
 
         LOG.info("Waiting until error occurs");
         while (!errorOccured.get()) { /* wait */ }
@@ -40,8 +39,16 @@ public class Application {
         context.close();
     }
 
+    private static void sendMessages(JmsTemplate jmsTemplate, String queueName, int amountOfMessages) {
+        LOG.info("Sending {} messages to {}", amountOfMessages, queueName);
+        for (int i = 1; i <= amountOfMessages; i++) {
+            LOG.debug("Sending message " + i);
+            jmsTemplate.convertAndSend(queueName, Integer.toString(i));
+        }
+    }
+
     @Bean
-    public static PropertySourcesPlaceholderConfigurer configurer() {
+    public PropertySourcesPlaceholderConfigurer configurer() {
         return new PropertySourcesPlaceholderConfigurer();
     }
 
