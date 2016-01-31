@@ -1,5 +1,5 @@
 # hikari-oracle-aq
-Example code of hooking up Oracle AQ over Spring with HikariCP data source
+Example code of hooking up Oracle AQ over Spring with [HikariCP data source](https://github.com/brettwooldridge/HikariCP)
 
 Since the oracle driver code assumes the use of an Oracle specific DataSource, it can be a bit of a hassle getting it to work with a different datasource. The friendly people at spring developed the NativeJdbcExtractors for that ([as described here](http://docs.spring.io/spring-data/data-jdbc/docs/current/reference/html/orcl.streamsaq.html)). I've tried to use their code to wrap Connections served by the HikariDataSource, which works functionality-wise, except that the pool no longer seems to release (and thus reuse) any connections
 
